@@ -1,11 +1,12 @@
+import importlib
 from django.contrib.auth.signals import user_logged_in
 from django.core.exceptions import FieldDoesNotExist
 from django.dispatch import receiver
 from django.db import models
 from django.contrib.auth import get_user_model
 from ipware import get_client_ip
-import importlib
-from .app_settings import (GEOLOCATION_METHOD, get_geolocation_data, GEOLOCATION_BLOCK_FIELDS,
+from .utils import get_geolocation_data
+from .app_settings import (GEOLOCATION_METHOD, GEOLOCATION_BLOCK_FIELDS,
                            GEOLOCATION_PLACEHOLDER_IP, DEBUG)
 
 

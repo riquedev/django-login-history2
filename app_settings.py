@@ -1,5 +1,5 @@
 from django.conf import settings
-from .utils import get_geolocation_data
+
 
 GEOLOCATION_METHOD = getattr(
     settings,
