@@ -28,7 +28,7 @@ setuptools.setup(
         "Intended Audience :: Developers",
         "Programming Language :: Python :: 3"
     ],
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(exclude=("tests",'django_login_history', "manage.py")),
     include_package_data=True,
     python_requires=">=3.8"
 )
