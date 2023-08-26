@@ -22,7 +22,7 @@ setuptools.setup(
         'Django>=3.2',
     ],
     classifiers=[
-        "App :: Django",
+        "Framework :: Django",
         "Intended Audience :: Developers",
         "Programming Language :: Python :: 3"
     ],
