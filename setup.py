@@ -1,10 +1,7 @@
 import setuptools
-from pip._internal.req import parse_requirements
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
-
-install_reqs = list(map(lambda req: req.requirement, parse_requirements('requirements.txt', session="github")))
 
 setuptools.setup(
     name="django_login_history2",
@@ -21,7 +18,11 @@ setuptools.setup(
         "Bug Tracker": "https://github.com/riquedev/django-login-history2/issues",
         "Repository": "https://github.com/riquedev/django-login-history2",
     },
-    install_requires=install_reqs,
+    install_requires=[
+        'Django>=3.2.13',
+        'django_ipware>=4.0.2',
+        'requests>=2.31.0',
+    ],
     classifiers=[
         "Framework :: Django",
         "Intended Audience :: Developers",
