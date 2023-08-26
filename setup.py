@@ -1,10 +1,10 @@
 import setuptools
-from pipreqs.pipreqs import parse_requirements
+from pip._internal.req import parse_requirements
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-install_reqs = list(map(lambda item: f"{item['name']}>={item['version']}", parse_requirements('requirements.txt')))
+install_reqs = list(map(lambda req: req.requirement, parse_requirements('requirements.txt', session="github")))
 
 setuptools.setup(
     name="django_login_history2",
