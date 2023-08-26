@@ -1,7 +1,7 @@
 # django-login-history2
 
 ![GitHub License](https://img.shields.io/github/license/riquedev/django-login-history2)
-![Python Version](https://img.shields.io/badge/python-3.6%2B-blue)
+![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
 ![Django Version](https://img.shields.io/badge/django-3.2%2B-green)
 ![Maintenance](https://img.shields.io/maintenance/yes/2023)
 
