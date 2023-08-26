@@ -4,7 +4,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="django_login_history",
+    name="django_login_history2",
     version="0.0.1",
     author="Henrique da Silva Santos",
     author_email="rique_dev@hotmail.com",
