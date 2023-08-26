@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="django_login_history2",
-    version="0.0.1",
+    version="0.0.2",
     author="Henrique da Silva Santos",
     author_email="rique_dev@hotmail.com",
     description="It's easy to use, plug-in django app that once included, stores logins history (with device data, like IP, user-agent, location etc.) of all users",
