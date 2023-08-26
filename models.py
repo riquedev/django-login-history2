@@ -47,7 +47,7 @@ def post_login(sender, user, request, **kwargs):
                 geolocation_func = getattr(module, func_name)
                 result = geolocation_func(client_ip)
             except (ImportError, AttributeError) as er:
-                raise ValueError("Invalid geolocation method specified in settings.\n", er)
+                raise ValueError("Invalid geolocation method specified in settings.\n", er) from er
 
         if not result:
             result = get_geolocation_data(client_ip)
