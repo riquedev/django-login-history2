@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from ipware import get_client_ip
 from .utils import get_geolocation_data
 from .app_settings import (GEOLOCATION_METHOD, GEOLOCATION_BLOCK_FIELDS,
-                           GEOLOCATION_PLACEHOLDER_IP, DEBUG)
+                           GEOLOCATION_PLACEHOLDER_IP)
 
 
 class Login(models.Model):
@@ -33,14 +33,14 @@ def post_login(sender, user, request, **kwargs):
     method_path = GEOLOCATION_METHOD
     result = None
 
-    if DEBUG and not is_routable:
+    if not client_ip:
         client_ip = GEOLOCATION_PLACEHOLDER_IP
 
-    if client_ip:
+    else:
         if not is_routable:
-            client_ip = GEOLOCATION_PLACEHOLDER_IP
+            result = {"error": True, "reason": "Address not routable"}
 
-        if method_path:
+        elif method_path:
             module_name, func_name = method_path.rsplit('.', 1)
             try:
                 module = importlib.import_module(module_name)
@@ -49,9 +49,8 @@ def post_login(sender, user, request, **kwargs):
             except (ImportError, AttributeError) as er:
                 raise ValueError("Invalid geolocation method specified in settings.\n", er) from er
 
-        if not result:
-            result = get_geolocation_data(client_ip)
-
+    if not result:
+        result = get_geolocation_data(client_ip)
         assert isinstance(result, dict)
 
         mapped_fields = {}
