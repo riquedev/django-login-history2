@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from ipware import get_client_ip
 from .utils import get_geolocation_data
 from .app_settings import (GEOLOCATION_METHOD, GEOLOCATION_BLOCK_FIELDS,
-                           GEOLOCATION_PLACEHOLDER_IP, DEBUG)
+                           GEOLOCATION_PLACEHOLDER_IP)
 
 
 class Login(models.Model):
