@@ -66,10 +66,10 @@ def post_login(sender, user, request, **kwargs):
             except FieldDoesNotExist:
                 pass
 
-        _ = Login.objects.create(
-            user=user,
-            ip=client_ip,
-            user_agent=request.META.get('HTTP_USER_AGENT', ''),
-            ip_info=result,
-            **mapped_fields
-        )
+    _ = Login.objects.create(
+        user=user,
+        ip=client_ip,
+        user_agent=request.META.get('HTTP_USER_AGENT', ''),
+        ip_info=result,
+        **mapped_fields
+    )
