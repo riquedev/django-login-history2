@@ -1,4 +1,5 @@
 import importlib
+from dataclasses import asdict
 from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.core.exceptions import FieldDoesNotExist
@@ -6,10 +7,9 @@ from django.dispatch import receiver
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext as _
-from ipware import get_client_ip
+from .dto import IPInfo
 from .utils import get_geolocation_data
-from .app_settings import (GEOLOCATION_METHOD, GEOLOCATION_BLOCK_FIELDS,
-                           GEOLOCATION_PLACEHOLDER_IP)
+from .app_settings import (GEOLOCATION_METHOD, GEOLOCATION_BLOCK_FIELDS)
 
 
 class LoginQuerySet(models.QuerySet):
@@ -45,7 +45,6 @@ class Login(models.Model):
     user_agent = models.TextField(verbose_name=_("user agent"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("created at"), db_index=True)
     logout_at = models.DateTimeField(null=True, blank=True, verbose_name=_("logout at"), db_index=True)
-
     objects = LoginManager()
 
     @property
@@ -64,34 +63,23 @@ class Login(models.Model):
 
 @receiver(user_logged_in)
 def post_login(sender, user, request, **kwargs):
-    client_ip, is_routable = get_client_ip(request)
     method_path = GEOLOCATION_METHOD
     result = None
+    module_name, func_name = method_path.rsplit('.', 1)
 
-    if not client_ip:
-        client_ip = GEOLOCATION_PLACEHOLDER_IP
+    try:
+        module = importlib.import_module(module_name)
+        geolocation_func = getattr(module, func_name)
+        result = geolocation_func(request, user)
+    except (ImportError, AttributeError) as er:
+        raise ValueError("Invalid geolocation method specified in settings.\n", er) from er
 
-    else:
-        if not is_routable:
-            result = {"error": True, "reason": "Address not routable"}
-
-        elif method_path:
-            module_name, func_name = method_path.rsplit('.', 1)
-            try:
-                module = importlib.import_module(module_name)
-                geolocation_func = getattr(module, func_name)
-                result = geolocation_func(client_ip)
-            except (ImportError, AttributeError) as er:
-                raise ValueError("Invalid geolocation method specified in settings.\n", er) from er
-
-    if not result:
-        result = get_geolocation_data(client_ip)
-        assert isinstance(result, dict)
-
+    if result:
+        assert isinstance(result, IPInfo)
         mapped_fields = {}
+        result_dict = asdict(result)
 
-        for key, value in result.items():
-
+        for key, value in result_dict.items():
             if key in GEOLOCATION_BLOCK_FIELDS:
                 continue
 
@@ -103,9 +91,9 @@ def post_login(sender, user, request, **kwargs):
 
         _ = Login.objects.create(
             user=user,
-            ip=client_ip,
-            user_agent=request.META.get('HTTP_USER_AGENT', ''),
-            ip_info=result,
+            ip=result.ip,
+            user_agent=result.user_agent,
+            ip_info=result_dict,
             **mapped_fields
         )
 
