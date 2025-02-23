@@ -55,6 +55,60 @@ user = User.objects.get(username="myuser")
 history = user.login_history.all()
 ```
 
+# IP Geolocation Provider Extension
+
+This module allows you to extend the functionality of the `IPChecker` class by adding custom providers to fetch geolocation data for IP addresses. The provided example shows how to implement a new provider by creating a class that extends the `IPCheckerAbstract` class and implements the `get_geolocation_data()` method.
+
+## How to Create a New Geolocation Provider
+
+To create your own IP geolocation provider, follow these steps:
+
+### 1. Create a New Class That Inherits from `IPCheckerAbstract`
+
+Your class should inherit from `IPCheckerAbstract` to ensure it has all the required properties and methods for retrieving geolocation data for an IP address.
+
+### 2. Implement the `get_geolocation_data()` Method
+
+The `get_geolocation_data()` method should be implemented to fetch the geolocation data either from an external service or a custom logic.
+
+#### Example: `MyIPService` Provider
+
+```python
+class IPCheckerMyIPService(IPCheckerAbstract):
+    def get_geolocation_data(self) -> IPInfo:
+        from django_login_history2.app_settings import get_cache, CACHE_TIMEOUT
+        key = f'myipservice:{self.client_ip}'
+        data = get_cache().get(key)
+
+        if not data:
+            data = super().get_geolocation_data()
+            if not self.is_routable:
+                data = data.with_overrides(error=True, reason="Address not routable")
+            else:                
+                response = requests.get(f'https://myipservice.com/{self.client_ip}/json/', timeout=60)
+                geolocation_data = response.json()
+                data = data.with_overrides(**geolocation_data)            
+            get_cache().set(key, data, timeout=CACHE_TIMEOUT)
+
+        return data
+```
+### 3. Register Your New Provider
+To use your custom provider, register it in the appropriate part of your code or configuration. This ensures that your provider is used to fetch the geolocation data when necessary.
+
+#### Key Concepts
+- Cache: To avoid making repetitive calls to external APIs, the get_cache() function is used to cache geolocation data. This improves performance and reduces external service dependencies.
+- Timeout and Error Handling: External APIs may have slow responses or return errors, so it's important to add error handling and set appropriate timeouts, as shown in the example.
+- Custom Data: The get_geolocation_data() method can return more than just basic geolocation information, such as country, city, coordinates (latitude/longitude), etc. You can also customize it to return an error if the IP address is not routable.
+
+### Example Usage
+Once you have implemented and registered your custom provider, you can use it in your code like so:
+
+```python
+ip_checker = IPCheckerMyIPService(request, user)
+geolocation_data = ip_checker.get_geolocation_data()
+print(geolocation_data)
+```
+
 ## Contributing
 Feel free to open issues or create pull requests to contribute to the project. If you find a bug or need a feature, open an issue and we will try to fix it as soon as possible.
 
