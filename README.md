@@ -41,7 +41,7 @@ python manage.py migrate
 This app can be configured through settings.py. The following settings are available:
 
 - LOGIN_HISTORY_GEOLOCATION_METHOD: Define the method to use for geolocation. (Default: django_login_history2.utils.get_geolocation_data)
-- LOGIN_HISTORY_GEOLOCATION_HELPER_CLASS: Define the class used for geolocation (Default: django_login_history2.helper.IPCheckerTestMode).
+- LOGIN_HISTORY_GEOLOCATION_HELPER_CLASS: Define the class used for geolocation (Default: django_login_history2.helper.IPCheckerIPApi).
 - LOGIN_HISTORY_GEOLOCATION_PLACEHOLDER_IP: Define a placeholder IP for testing mode (Default: 8.8.8.8).
 - LOGIN_HISTORY_GEOLOCATION_CACHE: Specify the cache to use for geolocation data.
 
