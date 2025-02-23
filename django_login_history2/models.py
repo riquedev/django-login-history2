@@ -32,6 +32,7 @@ def post_login(sender, user, request, **kwargs):
     client_ip, is_routable = get_client_ip(request)
     method_path = GEOLOCATION_METHOD
     result = None
+    mapped_fields = {}
 
     if not client_ip:
         client_ip = GEOLOCATION_PLACEHOLDER_IP
@@ -53,8 +54,6 @@ def post_login(sender, user, request, **kwargs):
         result = get_geolocation_data(client_ip)
         assert isinstance(result, dict)
 
-        mapped_fields = {}
-
         for key, value in result.items():
 
             if key in GEOLOCATION_BLOCK_FIELDS:
@@ -66,10 +65,10 @@ def post_login(sender, user, request, **kwargs):
             except FieldDoesNotExist:
                 pass
 
-        _ = Login.objects.create(
-            user=user,
-            ip=client_ip,
-            user_agent=request.META.get('HTTP_USER_AGENT', ''),
-            ip_info=result,
-            **mapped_fields
-        )
+    _ = Login.objects.create(
+        user=user,
+        ip=client_ip,
+        user_agent=request.META.get('HTTP_USER_AGENT', ''),
+        ip_info=result,
+        **mapped_fields
+    )
