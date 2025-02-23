@@ -74,9 +74,11 @@ The `get_geolocation_data()` method should be implemented to fetch the geolocati
 #### Example: `MyIPService` Provider
 
 ```python
+import requests
+from django_login_history2.app_settings import get_cache, CACHE_TIMEOUT
+from django_login_history2.helper import IPCheckerAbstract, IPInfo
 class IPCheckerMyIPService(IPCheckerAbstract):
-    def get_geolocation_data(self) -> IPInfo:
-        from django_login_history2.app_settings import get_cache, CACHE_TIMEOUT
+    def get_geolocation_data(self) -> IPInfo:        
         key = f'myipservice:{self.client_ip}'
         data = get_cache().get(key)
 
