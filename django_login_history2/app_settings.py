@@ -17,7 +17,7 @@ GEOLOCATION_METHOD = getattr(
 GEOLOCATION_HELPER_CLASS = getattr(
     settings,
     'LOGIN_HISTORY_GEOLOCATION_HELPER_CLASS',
-    'django_login_history2.helper.IPCheckerTestMode'
+    'django_login_history2.helper.IPCheckerIPApi'
 )
 
 def get_geolocation_helper_class() -> Type[IPCheckerAbstract]:
