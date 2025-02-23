@@ -8,7 +8,6 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from .dto import IPInfo
-from .utils import get_geolocation_data
 from .app_settings import (GEOLOCATION_METHOD, GEOLOCATION_BLOCK_FIELDS)
 
 

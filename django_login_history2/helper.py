@@ -1,7 +1,7 @@
 import abc
 
 import requests
-from django.contrib.auth.models import AnonymousUser, User
+from django.contrib.auth.models import User
 from django.http import HttpRequest
 from ipware import get_client_ip
 
@@ -90,7 +90,7 @@ class IPCheckerIPApi(IPCheckerAbstract):
             if not self.is_routable:
                 data = data.with_overrides(error=True, reason="Address not routable")
             else:
-                with requests.get(f'https://ipapi.co/{self.client_ip}/json/') as handler:
+                with requests.get(f'https://ipapi.co/{self.client_ip}/json/', timeout=60) as handler:
                     data = data.with_overrides(**handler.json())
 
             get_cache().set(key, data, timeout=CACHE_TIMEOUT)
