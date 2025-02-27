@@ -9,7 +9,7 @@ from django_login_history2.app_settings import get_geolocation_helper_class
 from django_login_history2.helper import IPCheckerTestMode, IPCheckerIPApi
 from django_login_history2.models import Login
 from django_login_history2.mock.ip_api import (get_mock, RESERVED_IP_ADDRESS_RESPONSE, INVALID_IP_ADDRESS_RESPONSE,
-                                               SUCCESS_RESPONSE, QUOTA_EXCEEDED_RESPONSE)
+                                               SUCCESS_RESPONSE, QUOTA_EXCEEDED_RESPONSE, INVALID_KEY_RESPONSE)
 
 
 class LoginHistoryTestCase(TestCase):
@@ -100,4 +100,15 @@ class LoginHistoryTestCase(TestCase):
         data = instance.get_geolocation_data()
         self.assertTrue(data.error)
         self.assertEqual(data.error_reason, 'Reserved IP Address')
+        mock_get.assert_called_once()
+
+    @patch("requests.get")
+    def test_ip_api_invalid_key(self, mock_get: MagicMock):
+        mock_get.return_value = get_mock(INVALID_KEY_RESPONSE)
+        mock_get.return_value.__enter__.return_value = get_mock(INVALID_KEY_RESPONSE)
+        instance = IPCheckerIPApi(self.google_request, self.user)
+        self.assertTrue(instance.is_routable)
+        data = instance.get_geolocation_data()
+        self.assertTrue(data.error)
+        self.assertEqual(data.error_reason, 'Invalid Key Invalid key. SignUp @ https://ipapi.co/pricing/')
         mock_get.assert_called_once()

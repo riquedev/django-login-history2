@@ -96,6 +96,24 @@ class IPCheckerTestMode(IPCheckerAbstract):
 
 class IPCheckerIPApi(IPCheckerAbstract):
 
+    @property
+    def api_key(self):
+        from django_login_history2.app_settings import IP_API_KEY
+        return IP_API_KEY
+
+    def __init__(self, request: HttpRequest, user: User):
+        super().__init__(request, user)
+
+        if not self.api_key:
+            self.logger.warning('You are using the default class "IPCheckerIPApi" without a LOGIN_HISTORY_IP_API_KEY, '
+                                'consider purchasing a plan at "https://ipapi.co/#pricing" to avoid limits')
+
+    def get_url(self):
+        url = f'https://ipapi.co/{self.client_ip}/json/'
+        if self.api_key:
+            url += f'?key={self.api_key}'
+        return url
+
     def get_geolocation_data(self) -> IPInfo:
         from django_login_history2.app_settings import get_cache, CACHE_TIMEOUT
         key = f'ipapi:{self.client_ip}'
@@ -106,8 +124,8 @@ class IPCheckerIPApi(IPCheckerAbstract):
             if not self.is_routable:
                 data = data.with_overrides(error=True, error_reason="Address not routable")
             else:
-                with requests.get(f'https://ipapi.co/{self.client_ip}/json/', timeout=60) as handler:
-                    if handler.status_code in (429, 200):
+                with requests.get(self.get_url(), timeout=60) as handler:
+                    if handler.status_code in (200,403,429):
                         response = handler.json()
                         message = response.pop('message', '')
                         reason = response.pop('reason', '')

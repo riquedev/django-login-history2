@@ -62,6 +62,8 @@ CACHE_TIMEOUT = getattr(
 
 SHOW_USER_IP_ON_LOGGING = getattr(settings, 'LOGIN_HISTORY_SHOW_USER_IP_ON_LOGGING', False)
 
+IP_API_KEY = getattr(settings, 'LOGIN_HISTORY_IP_API_KEY', None)
+
 def get_cache() -> BaseCache:
     return caches[CACHE]
 
