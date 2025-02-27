@@ -30,7 +30,8 @@ SUCCESS_RESPONSE: IPApiResponse = ({
                                        "country_area": 9629091.0,
                                        "country_population": 327167434,
                                        "asn": "AS15169",
-                                       "org": "GOOGLE"
+                                       "org": "GOOGLE",
+                                       "error": False
                                    }, 200)
 
 QUOTA_EXCEEDED_RESPONSE: IPApiResponse = ({"error": True, "reason": "RateLimited", "message": "127.0.0.1"}, 429)
