@@ -114,23 +114,29 @@ class IPCheckerIPApi(IPCheckerAbstract):
             url += f'?key={self.api_key}'
         return url
 
+    def api_get(self, *args, **kwargs):
+        return requests.get(*args, **kwargs)
+
     def get_geolocation_data(self) -> IPInfo:
-        from django_login_history2.app_settings import get_cache, CACHE_TIMEOUT
+        from django_login_history2.app_settings import get_cache, CACHE_TIMEOUT, IS_TESTING
         key = f'ipapi:{self.client_ip}'
-        data = get_cache().get(key)
+        if IS_TESTING:
+            data = None
+        else:
+            data = get_cache().get(key)
 
         if not data:
             data = super().get_geolocation_data()
             if not self.is_routable:
                 data = data.with_overrides(error=True, error_reason="Address not routable")
             else:
-                with requests.get(self.get_url(), timeout=60) as handler:
-                    if handler.status_code in (200,403,429):
-                        response = handler.json()
-                        message = response.pop('message', '')
-                        reason = response.pop('reason', '')
-                        data = data.with_overrides(**response)
-                        data.error_reason = f"{reason} {message}".strip()
+                handler = self.api_get(timeout=60)
+                if handler.status_code in (200, 403, 429):
+                    response = handler.json()
+                    message = response.pop('message', '')
+                    reason = response.pop('reason', '')
+                    data = data.with_overrides(**response)
+                    data.error_reason = f"{reason} {message}".strip()
 
             get_cache().set(key, data, timeout=CACHE_TIMEOUT)
 
