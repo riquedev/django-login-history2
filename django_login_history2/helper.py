@@ -6,6 +6,7 @@ from django.http import HttpRequest
 from ipware import get_client_ip
 
 from django_login_history2.dto import IPInfo
+from django_login_history2.logger import get_logger
 
 
 class IPCheckerAbstract(abc.ABC):
@@ -13,6 +14,8 @@ class IPCheckerAbstract(abc.ABC):
     __client_ip: str
     __is_routable: bool
     __user : User
+    logger = get_logger()
+
     def __init__(self, request: HttpRequest, user: User):
         self.__request = request
         self.__client_ip, self.__is_routable = get_client_ip(request)
@@ -36,11 +39,24 @@ class IPCheckerAbstract(abc.ABC):
 
     @abc.abstractmethod
     def get_geolocation_data(self) -> IPInfo:
+        from django_login_history2.app_settings import SHOW_USER_IP_ON_LOGGING
+        log_msg = f"Building a geolocation data from user {self.user.pk}"
+
+        if SHOW_USER_IP_ON_LOGGING:
+            log_msg += f" with IP {self.client_ip}"
+
+        self.logger.debug(log_msg)
+
         return IPInfo(
             user=self.user.pk,
             ip=self.client_ip,
             user_agent=self.user_agent,
         )
+
+    def after_load_ip_info(self, data: IPInfo):
+        if data.error:
+            self.logger.error(f"Can't get ip info from user {self.user.pk}: {data.error_reason}")
+        return data
 
 
 class IPCheckerTestMode(IPCheckerAbstract):
@@ -88,10 +104,15 @@ class IPCheckerIPApi(IPCheckerAbstract):
         if not data:
             data = super().get_geolocation_data()
             if not self.is_routable:
-                data = data.with_overrides(error=True, reason="Address not routable")
+                data = data.with_overrides(error=True, error_reason="Address not routable")
             else:
                 with requests.get(f'https://ipapi.co/{self.client_ip}/json/', timeout=60) as handler:
-                    data = data.with_overrides(**handler.json())
+                    if handler.status_code in (429, 200):
+                        response = handler.json()
+                        message = response.pop('message', '')
+                        reason = response.pop('reason', '')
+                        data = data.with_overrides(**response)
+                        data.error_reason = f"{reason}: {message}"
 
             get_cache().set(key, data, timeout=CACHE_TIMEOUT)
 
