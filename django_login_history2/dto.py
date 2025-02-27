@@ -35,6 +35,8 @@ class IPInfo:
     user_agent: Optional[str] = None
     error: Optional[bool] = None
     error_reason: Optional[str] = None
+    reserved: Optional[bool] = None
+
 
     def with_overrides(self, **kwargs) -> 'IPInfo':
         return replace(self, **kwargs)
