@@ -112,7 +112,7 @@ class IPCheckerIPApi(IPCheckerAbstract):
                         message = response.pop('message', '')
                         reason = response.pop('reason', '')
                         data = data.with_overrides(**response)
-                        data.error_reason = f"{reason}: {message}"
+                        data.error_reason = f"{reason} {message}".strip()
 
             get_cache().set(key, data, timeout=CACHE_TIMEOUT)
 
