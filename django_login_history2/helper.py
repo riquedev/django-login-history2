@@ -115,7 +115,7 @@ class IPCheckerIPApi(IPCheckerAbstract):
         return url
 
     def api_get(self, *args, **kwargs):
-        return requests.get(*args, **kwargs)
+        return requests.get(url=self.get_url(), *args, **kwargs)
 
     def get_geolocation_data(self) -> IPInfo:
         from django_login_history2.app_settings import get_cache, CACHE_TIMEOUT, IS_TESTING
